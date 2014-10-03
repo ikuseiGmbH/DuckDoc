@@ -1,5 +1,7 @@
 module DuckDoc
   module JsInjections
+
+    # Create a duckdoc annotation
     def annotate(selector, text, opts={})
       code = <<-EOS
       window.duckdoc_annotation = window.duckdoc_annotation || 0;
@@ -28,6 +30,22 @@ module DuckDoc
       page.driver.execute_script code
     end
 
+    # Remove all duckdoc annotations
+    def remove_annotations
+      code = <<-EOS
+      (function(){
+        window.duckdoc_annotation = window.duckdoc_annotation || 0;
+        for(var i=window.duckdoc_annotation-1; i>=0; i--){
+          var anno = document.getElementById('duckdoc_annotation_' + i)
+          anno.parentNode.removeChild(anno);
+        }
+        window.duckdoc_annotation = 0;
+      })();
+      EOS
+      page.driver.execute_script code
+    end
+
+    # Create a clip box around all duckdoc annotations
     def annotations_clip_box(opts={})
       id = "duckdoc_clip_box"
       opts[:padding_top]  ||= 100; opts[:padding_bottom] ||= 100
@@ -58,6 +76,7 @@ module DuckDoc
       "##{id}"
     end
 
+    # Create a clip box
     def clip_box(x,y,w,h)
       id = "duckdoc_clip_box"
       code = <<-EOS
